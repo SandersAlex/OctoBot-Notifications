@@ -13,10 +13,9 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 
 from octobot_channels.util import create_channel_instance
-
 from octobot_channels.channels.channel import set_chan, get_chan, Channel
 from octobot_notifications.channel.notifications import NotificationChannel, NotificationChannelProducer
 from octobot_commons.constants import CONFIG_CATEGORY_NOTIFICATION, CONFIG_NOTIFICATION_TYPE
@@ -25,6 +24,7 @@ from octobot_services.abstract_service_user import AbstractServiceUser
 
 
 class AbstractNotifier(AbstractServiceUser):
+    __metaclass__ = ABCMeta
     # Override this key with the identifier of the notifier (used to know if enabled)
     NOTIFICATION_TYPE_KEY = None
     # The service required to run this notifier

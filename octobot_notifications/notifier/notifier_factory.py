@@ -14,7 +14,8 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-from octobot_commons.tentacles_management import get_all_classes_from_parent
+from octobot_commons.tentacles_management import get_all_classes_from_parent, \
+    is_abstract_using_inspection_and_class_naming
 from octobot_notifications.notifier.abstract_notifier import AbstractNotifier
 
 
@@ -24,7 +25,9 @@ class NotifierFactory:
 
     @staticmethod
     def get_available_notifiers():
-        return get_all_classes_from_parent(AbstractNotifier)
+        return [notifier_class
+                for notifier_class in get_all_classes_from_parent(AbstractNotifier)
+                if not is_abstract_using_inspection_and_class_naming(notifier_class)]
 
     async def create_notifier(self, notifier_class):
         return notifier_class(self.config)
