@@ -49,8 +49,8 @@ class AbstractNotifier(AbstractServiceUser):
             self.logger.error(f"Exception when handling notification: {e}")
             self.logger.exception(e)
 
-    async def initialize(self, backtesting_enabled) -> bool:
-        if await AbstractServiceUser.initialize(self, backtesting_enabled):
+    async def _initialize_impl(self, backtesting_enabled) -> bool:
+        if await AbstractServiceUser._initialize_impl(self, backtesting_enabled):
             self.service = self.REQUIRED_SERVICE.instance()
             channel = await self._create_notification_channel_if_not_existing()
             await channel.new_consumer(self._notification_callback)
