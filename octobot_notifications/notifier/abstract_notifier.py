@@ -18,7 +18,7 @@ from abc import abstractmethod, ABCMeta
 from octobot_channels.util import create_channel_instance
 from octobot_channels.channels.channel import set_chan, get_chan, Channel
 from octobot_notifications.channel.notifications import NotificationChannel, NotificationChannelProducer
-from octobot_commons.constants import CONFIG_CATEGORY_NOTIFICATION, CONFIG_NOTIFICATION_TYPE
+from octobot_notifications.constants import CONFIG_CATEGORY_NOTIFICATION, CONFIG_NOTIFICATION_TYPE
 from octobot_notifications.notification.notification import Notification
 from octobot_services.abstract_service_user import AbstractServiceUser
 

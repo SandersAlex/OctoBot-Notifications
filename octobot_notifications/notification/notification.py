@@ -13,8 +13,8 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_commons.enums import MarkdownFormat, NotificationCategory
-from octobot_notifications.enums import NotificationLevel
+from octobot_commons.enums import MarkdownFormat
+from octobot_notifications.enums import NotificationLevel, NotificationCategory
 
 
 class Notification:

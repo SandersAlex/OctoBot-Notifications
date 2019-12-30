@@ -19,10 +19,10 @@ from octobot_trading.api.orders import get_order_exchange_name
 from octobot_trading.api.trader import is_trader_simulated
 from octobot_trading.data.order import Order
 
-from octobot_commons.enums import MarkdownFormat, NotificationCategory
+from octobot_commons.enums import MarkdownFormat
 from octobot_commons.pretty_printer import PrettyPrinter
 from octobot_notifications.notification.notification import Notification
-from octobot_notifications.enums import NotificationLevel
+from octobot_notifications.enums import NotificationLevel, NotificationCategory
 from octobot_trading.constants import REAL_TRADER_STR, SIMULATOR_TRADER_STR
 
 

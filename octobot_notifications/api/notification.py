@@ -16,10 +16,10 @@
 from octobot_channels.channels.channel import get_chan
 
 from octobot_notifications.channel.notifications import NotificationChannelProducer, NotificationChannel
-from octobot_commons.enums import MarkdownFormat, NotificationCategory
+from octobot_commons.enums import MarkdownFormat
 from octobot_notifications.notification.notification import Notification
 from octobot_notifications.notifier.notifier_factory import NotifierFactory
-from octobot_notifications.enums import NotificationLevel
+from octobot_notifications.enums import NotificationLevel, NotificationCategory
 
 
 def create_notifier_factory(config) -> NotifierFactory:
