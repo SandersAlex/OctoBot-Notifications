@@ -15,4 +15,4 @@
 #  License along with this library.
 
 PROJECT_NAME = "OctoBot-Notifications"
-VERSION = "0.0.0"  # major.minor.revision
+VERSION = "1.0.0"  # major.minor.revision
