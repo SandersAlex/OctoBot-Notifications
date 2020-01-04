@@ -26,11 +26,12 @@ def create_notifier_factory(config) -> NotifierFactory:
     return NotifierFactory(config)
 
 
-def create_notification(text: str, title="", markdown_format: MarkdownFormat = MarkdownFormat.NONE,
+def create_notification(text: str, title="", markdown_text="",
+                        markdown_format: MarkdownFormat = MarkdownFormat.IGNORE,
                         level: NotificationLevel = NotificationLevel.INFO,
                         category: NotificationCategory = NotificationCategory.GLOBAL_INFO,
                         linked_notification=None) -> Notification:
-    return Notification(text, title, markdown_format, level, category, linked_notification)
+    return Notification(text, title, markdown_text, markdown_format, level, category, linked_notification)
 
 
 async def send_notification(notification: Notification) -> None:

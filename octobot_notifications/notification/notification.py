@@ -18,10 +18,12 @@ from octobot_notifications.enums import NotificationLevel, NotificationCategory
 
 
 class Notification:
-    def __init__(self, text: str, title: str, markdown_format: MarkdownFormat,
-                 level: NotificationLevel, category: NotificationCategory, linked_notification):
+    def __init__(self, text: str, title: str, markdown_text: str,
+                 markdown_format: MarkdownFormat,
+                 level: NotificationLevel, category: NotificationCategory,
+                 linked_notification):
         self.text = text
-        self.markdown_text = text
+        self.markdown_text = markdown_text
         self.title = title
         self.level = level
         self.markdown_format = markdown_format

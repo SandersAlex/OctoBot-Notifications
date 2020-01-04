@@ -19,8 +19,14 @@ from octobot_channels.util import create_channel_instance
 from octobot_channels.channels.channel import set_chan, get_chan, Channel
 from octobot_notifications.channel.notifications import NotificationChannel, NotificationChannelProducer
 from octobot_notifications.constants import CONFIG_CATEGORY_NOTIFICATION, CONFIG_NOTIFICATION_TYPE
+from octobot_notifications.notification.formated_notifications import OrderCreationNotification, OrderEndNotification
 from octobot_notifications.notification.notification import Notification
 from octobot_services.abstract_service_user import AbstractServiceUser
+from octobot_trading.api.exchange import get_exchange_names, get_exchange_channel, \
+    get_exchange_manager_from_exchange_name
+from octobot_trading.api.profitability import get_profitability_stats
+from octobot_trading.channels.orders import OrdersChannel
+from octobot_trading.enums import OrderStatus
 
 
 class AbstractNotifier(AbstractServiceUser):
@@ -35,6 +41,7 @@ class AbstractNotifier(AbstractServiceUser):
         self.logger = self.get_logger()
         self.enabled = self.is_enabled(config)
         self.service = None
+        self.previous_notifications_by_identifier = {}
 
     # Override this method to use a notification when received
     @abstractmethod
@@ -52,11 +59,54 @@ class AbstractNotifier(AbstractServiceUser):
     async def _initialize_impl(self, backtesting_enabled) -> bool:
         if await AbstractServiceUser._initialize_impl(self, backtesting_enabled):
             self.service = self.REQUIRED_SERVICE.instance()
-            channel = await self._create_notification_channel_if_not_existing()
-            await channel.new_consumer(self._notification_callback)
-            self.logger.debug("Registered as notification consumer")
+            await self._create_and_subscribe_to_notification_channel()
+            await self._subscribe_to_order_channels()
             return True
         return False
+
+    async def _create_and_subscribe_to_notification_channel(self):
+        channel = await self._create_notification_channel_if_not_existing()
+        await channel.new_consumer(self._notification_callback)
+        self.logger.debug("Registered as notification consumer")
+
+    async def _order_notification_callback(self, exchange, symbol, order, is_closed, is_updated, is_from_bot):
+        # Do not notify on existing pre-start orders
+        if is_from_bot:
+            order_identifier = f"{exchange}_{order.order_id}"
+            # find the last notification for this order if any
+            linked_notification = self.previous_notifications_by_identifier[order_identifier] \
+                if order_identifier in self.previous_notifications_by_identifier else None
+            await self._handle_order_notification(order, linked_notification, order_identifier, exchange)
+
+    async def _handle_order_notification(self, order, linked_notification, order_identifier, exchange):
+        notification = None
+        if order.status is OrderStatus.OPEN:
+            notification = OrderCreationNotification(linked_notification, order)
+            # update last notification for this order
+            self.previous_notifications_by_identifier[order_identifier] = notification
+        else:
+            exchange_manager = get_exchange_manager_from_exchange_name(exchange)
+            _,  profitability_percent, profitability_diff, _,  _ = get_profitability_stats(exchange_manager)
+
+            if order.status is OrderStatus.CANCELED:
+                notification = OrderEndNotification(linked_notification, None, [order], order.get_profitability(),
+                                                    profitability_percent, profitability_diff, False)
+            if order.status in (OrderStatus.CLOSED, OrderStatus.FILLED):
+                notification = OrderEndNotification(linked_notification, order, [], order.get_profitability(),
+                                                    profitability_percent, profitability_diff, True)
+            # remove order from previous_notifications_by_identifier: no more notification from it to be received
+            if order_identifier in self.previous_notifications_by_identifier:
+                self.previous_notifications_by_identifier.pop(order_identifier)
+        await self._notification_callback(notification)
+
+    async def _subscribe_to_order_channels(self):
+        order_channel_name = OrdersChannel.get_name()
+        try:
+            for exchange_name in get_exchange_names():
+                channel = get_exchange_channel(order_channel_name, exchange_name)
+                await channel.new_consumer(self._order_notification_callback)
+        except KeyError:
+            self.logger.error("No order channel to subscribe to: impossible to send order notifications")
 
     @classmethod
     def is_enabled(cls, config):
